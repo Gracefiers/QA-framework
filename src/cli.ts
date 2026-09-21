@@ -7,6 +7,7 @@ import { registry } from './checks';
 import { writeJsonReport } from './reporters/json';
 import type { Check } from './core/types';
 import { resolve } from 'node:path';
+import { writeHtmlReport } from './reporters/html';
 
 const icons = { pass: '✔', fail: '✖', warn: '⚠', skipped: '–' } as const;
 
@@ -52,9 +53,10 @@ program
     const verdict = failed ? 'FAIL' : 'PASS';
     console.log(failed ? pc.red('\nFAIL') : pc.green('\nPASS'));
 
-    const file = writeJsonReport(opts.cwd, results, verdict, Date.now() - startAll);
-    console.log(pc.dim(`Rapport : ${file}`));
-
+    const jsonFile = writeJsonReport(opts.cwd, results, verdict, Date.now() - startAll);
+    const htmlFile = writeHtmlReport(jsonFile);
+    console.log(pc.dim(`Rapport JSON : ${jsonFile}`));
+    console.log(pc.dim(`Rapport HTML : ${htmlFile}`));
     process.exit(failed ? 1 : 0);
   });
 
