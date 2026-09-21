@@ -6,6 +6,7 @@ import { runChecks } from './core/runner';
 import { registry } from './checks';
 import { writeJsonReport } from './reporters/json';
 import type { Check } from './core/types';
+import { resolve } from 'node:path';
 
 const icons = { pass: '✔', fail: '✖', warn: '⚠', skipped: '–' } as const;
 
@@ -16,6 +17,7 @@ program
   .description('Lance tous les contrôles du projet')
   .option('--cwd <path>', 'dossier du projet à valider', process.cwd())
   .action(async (opts: { cwd: string }) => {
+    opts.cwd = resolve(opts.cwd);
     const startAll = Date.now();
     const config = loadConfig(opts.cwd);
 
