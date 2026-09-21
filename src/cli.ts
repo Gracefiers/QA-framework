@@ -4,6 +4,7 @@ import pc from 'picocolors';
 import { loadConfig } from './config';
 import { runChecks } from './core/runner';
 import { registry } from './checks';
+import { writeJsonReport } from './reporters/json';
 import type { Check } from './core/types';
 
 const icons = { pass: '✔', fail: '✖', warn: '⚠', skipped: '–' } as const;
@@ -15,6 +16,7 @@ program
   .description('Lance tous les contrôles du projet')
   .option('--cwd <path>', 'dossier du projet à valider', process.cwd())
   .action(async (opts: { cwd: string }) => {
+    const startAll = Date.now();
     const config = loadConfig(opts.cwd);
 
     const checks: Check[] = [];
@@ -45,7 +47,12 @@ program
     }
 
     const failed = results.some((r) => r.status === 'fail');
+    const verdict = failed ? 'FAIL' : 'PASS';
     console.log(failed ? pc.red('\nFAIL') : pc.green('\nPASS'));
+
+    const file = writeJsonReport(opts.cwd, results, verdict, Date.now() - startAll);
+    console.log(pc.dim(`Rapport : ${file}`));
+
     process.exit(failed ? 1 : 0);
   });
 
