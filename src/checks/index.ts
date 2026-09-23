@@ -10,4 +10,8 @@ export const registry: Record<string, Check> = {
   integration: scriptCheck('integration', 'test:integration'),
   coverage: scriptCheck('coverage', 'test:coverage'),
   e2e: scriptCheck('e2e', 'test:e2e', 'test-results'),
+  a11y: scriptCheck('a11y', 'test:a11y'),
+  visual: scriptCheck('visual', 'test:visual', 'test-results'),
+  audit: scriptCheck('audit', 'security:audit'),
+  secrets: scriptCheck('secrets', 'security:secrets'),
 };
