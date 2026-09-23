@@ -14,10 +14,11 @@ function listerFichiers(dir: string): string[] {
   return trouves;
 }
 
-export function scriptCheck(id: string, script: string, artifactsDir?: string): Check {
+export function scriptCheck(id: string, defaultScript: string, artifactsDir?: string): Check {
   return {
     id,
     async run(ctx) {
+      const script = ctx.config.checks[id]?.command ?? defaultScript;
       const { code, output } = await exec(`npm run ${script}`, ctx.cwd);
       if (code === 0) {
         return { status: 'pass', summary: `npm run ${script} OK` };
