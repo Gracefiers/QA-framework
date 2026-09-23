@@ -33,8 +33,13 @@ export function writeHtmlReport(jsonPath: string): string {
         <strong>${esc(r.id)}</strong>
         <span class="time">${r.durationMs} ms</span>
       </div>
-      <p>${esc(r.summary)}</p>
+            <p>${esc(r.summary)}</p>
       ${r.details ? `<pre>${esc(r.details.replace(ANSI, ''))}</pre>` : ''}
+      ${
+        r.artifacts?.length
+          ? `<ul class="artifacts">${r.artifacts.map((a) => `<li>📎 ${esc(a)}</li>`).join('')}</ul>`
+          : ''
+      }
     </section>`
     )
     .join('');

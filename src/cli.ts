@@ -44,7 +44,7 @@ program
     for (const r of results) {
       console.log(`${icons[r.status]} ${r.id.padEnd(12)} ${r.summary} (${r.durationMs} ms)`);
       if (r.status === 'fail' && r.details) {
-        const lines = r.details.trim().split('\n').slice(0, 15).map((l) => '    ' + l);
+        const lines = r.details.trim().split('\n').slice(-15).map((l) => '    ' + l);
         console.log(pc.dim(lines.join('\n')));
       }
     }
