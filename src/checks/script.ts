@@ -1,6 +1,6 @@
 import { existsSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
-import type { Check } from '../core/types';
+import type { Check, CheckRequirement } from '../core/types';
 import { exec } from '../core/exec';
 
 function listerFichiers(dir: string): string[] {
@@ -14,9 +14,10 @@ function listerFichiers(dir: string): string[] {
   return trouves;
 }
 
-export function scriptCheck(id: string, defaultScript: string, artifactsDir?: string): Check {
+export function scriptCheck(id: string, defaultScript: string, artifactsDir?: string, requirement?: CheckRequirement): Check {
   return {
     id,
+    requirement,
     async run(ctx) {
       const script = ctx.config.checks[id]?.command ?? defaultScript;
       const { code, output } = await exec(`npm run ${script}`, ctx.cwd);

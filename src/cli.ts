@@ -8,6 +8,7 @@ import { writeJsonReport } from './reporters/json';
 import type { Check } from './core/types';
 import { resolve } from 'node:path';
 import { writeHtmlReport } from './reporters/html';
+import { ensureReady } from './core/setup';
 
 const icons = { pass: '✔', fail: '✖', warn: '⚠', skipped: '–' } as const;
 
@@ -32,6 +33,9 @@ program
       }
       checks.push(check);
     }
+    for (const check of checks) {
+      await ensureReady(opts.cwd, check.id, check.requirement);
+    } 
 
     const raw = await runChecks(checks, { cwd: opts.cwd, config });
 
