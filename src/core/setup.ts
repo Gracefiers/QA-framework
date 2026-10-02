@@ -27,11 +27,11 @@ export async function ensureReady(cwd: string, id: string, req?: CheckRequiremen
     }
   }
 
-  if (req.script) {
+  for (const s of req.scripts ?? []) {
     const pkgJson = lirePackageJson(cwd);
-    if (!pkgJson.scripts?.[req.script.name]) {
-      console.log(pc.dim(`📝 [${id}] ajout du script "${req.script.name}"`));
-      await exec(`npm pkg set "scripts.${req.script.name}=${req.script.command}"`, cwd);
+    if (!pkgJson.scripts?.[s.name]) {
+      console.log(pc.dim(`📝 [${id}] ajout du script "${s.name}"`));
+      await exec(`npm pkg set "scripts.${s.name}=${s.command}"`, cwd);
     }
   }
 
