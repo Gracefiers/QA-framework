@@ -9,10 +9,15 @@ export const ConfigSchema = z.object({
       z.string(),
       z.object({
         enabled: z.boolean().default(true),
-        required: z.boolean().default(true), // obligatoire = bloquant (Quality Gate)
-        command: z.string().optional(), // remplace le script npm par défaut du check
+        required: z.boolean().default(true),
+        command: z.string().optional(),
       })
     )
+    .default({}),
+  gate: z
+    .object({
+      failFast: z.boolean().default(false),
+    })
     .default({}),
 });
 

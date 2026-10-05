@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <title>Guide d’utilisation — Framework QA</title>
+  <style>
+    body { font-family: Calibri, Arial, sans-serif; font-size: 12pt; color: #333; max-width: 800px; margin: 40px auto; line-height: 1.45; }
+    h1 { color: #1e3a5f; text-align: center; }
+    h2 { color: #1e3a5f; border-bottom: 1px solid #ccc; padding-bottom: 4px; }
+    h3 { color: #0f6e56; }
+    .sub { text-align: center; color: #555; }
+    pre { background: #f4f4f4; padding: 10px 14px; font-family: Consolas, monospace; font-size: 10.5pt; white-space: pre-wrap; }
+    table { border-collapse: collapse; width: 100%; margin: 12px 0; }
+    th, td { border: 1px solid #999; padding: 6px 8px; text-align: left; font-size: 11pt; }
+    th { background: #e8eef5; color: #1e3a5f; }
+    .note { background: #eef7f3; padding: 10px 12px; border-left: 4px solid #0f6e56; }
+  </style>
+</head>
+<body>
+  <h1>Guide d’utilisation</h1>
+  <p class="sub">Framework QA — quality gate pour projets web</p>
+  <p class="sub">Mode d’emploi pas à pas pour débutant · Windows · PowerShell</p>
+
+  <h2>1. C’est quoi ?</h2>
+  <p>Le framework QA est un outil en ligne de commande. Dans le dossier d’un projet (par exemple pilote-web), tu tapes <b>qa init</b> puis <b>qa test</b>.</p>
+  <ul>
+    <li><b>qa init</b> prépare le projet : config, scripts npm, fichiers d’outils et specs d’accueil manquants. Il n’écrase jamais un fichier déjà présent.</li>
+    <li><b>qa test</b> relance la même préparation si besoin, exécute les contrôles (lint, tests, sécurité, accessibilité, performance…), puis ouvre un rapport HTML.</li>
+  </ul>
+  <p>Tu n’as pas besoin de relancer chaque outil à la main.</p>
+
+  <h2>2. Ce dont tu as besoin</h2>
+  <ul>
+    <li>Windows, avec PowerShell.</li>
+    <li>Node.js et npm (dans le terminal : <code>node -v</code> puis <code>npm -v</code>).</li>
+    <li>Le dossier <b>qa_framework</b> (le code de l’outil).</li>
+    <li>Le dossier du projet à tester (ex. <b>pilote-web</b>), avec un <code>package.json</code>.</li>
+  </ul>
+  <p class="note"><b>À retenir :</b> sur cet ordinateur, npm peut échouer à cause d’un certificat. Avant les commandes npm, qa init ou qa test, exécute :<br><code>$env:NODE_OPTIONS='--use-system-ca'</code></p>
+
+  <h2>3. Préparer la commande qa (une seule fois)</h2>
+  <p>Cette étape installe la commande <b>qa</b> sur ton PC. Tu ne la refais pas à chaque projet.</p>
+  <ol>
+    <li>Ouvre PowerShell.</li>
+    <li>Va dans le dossier du framework :</li>
+  </ol>
+  <pre>cd "C:\Users\GrâceAdjetey\Documents\Mes projets\qa_framework"</pre>
+  <p>3. Active le correctif certificat, puis installe et compile :</p>
+  <pre>$env:NODE_OPTIONS='--use-system-ca'
+npm install
+npm run build
+npm link</pre>
+  <p>4. Vérifie que la commande existe :</p>
+  <pre>qa --help</pre>
+  <p>Tu dois voir <code>Usage: qa</code> et les commandes <code>init</code> et <code>test</code>. Si qa n’est pas reconnu, ferme le terminal, rouvre-le, et réessaie. Après une modification du code du framework, refais seulement <code>npm run build</code>.</p>
+
+  <h2>4. Lancer les tests sur un projet existant</h2>
+  <p>Un projet existant (comme pilote-web) a déjà un <code>package.json</code>. S’il manque des configs ou des scripts, <code>qa init</code> les ajoute sans toucher à ce qui existe déjà.</p>
+  <ol>
+    <li>Va dans le dossier du projet, pas dans qa_framework :</li>
+  </ol>
+  <pre>cd "C:\Users\GrâceAdjetey\Documents\Mes projets\pilote-web"</pre>
+  <p>2. Active le correctif certificat (si tu viens d’ouvrir le terminal) :</p>
+  <pre>$env:NODE_OPTIONS='--use-system-ca'</pre>
+  <p>3. (Optionnel) complète ce qui manque, puis lance la quality gate :</p>
+  <pre>qa init
+qa test</pre>
+  <p>Pendant l’attente, un spinner (⠋ ⠙ ⠹ …) indique le contrôle en cours.</p>
+  <p>À la fin tu vois :</p>
+  <ul>
+    <li>une ligne par contrôle : ✔ réussi, ✖ échec bloquant, ⚠ avertissement</li>
+    <li><b>PASS</b> (tout va bien) ou <b>FAIL</b> (un contrôle obligatoire a échoué)</li>
+    <li>le rapport HTML qui s’ouvre dans le navigateur</li>
+    <li>un lien <code>file://…</code> dans le terminal (Ctrl + clic si besoin)</li>
+  </ul>
+  <p class="note"><b>À retenir :</b> le rapport est aussi ici : <code>dossier-du-projet\.qa\report.html</code></p>
+
+  <h2>5. Préparer un nouveau projet</h2>
+  <p>Deux commandes suffisent après <code>npm init -y</code> : <b>qa init</b> puis <b>qa test</b>.</p>
+  <p><b>qa init</b> crée uniquement ce qui manque : <code>qa.config.json</code>, scripts npm, configs d’outils, specs d’accueil e2e / a11y / visual, lignes <code>.gitignore</code>. Il n’écrase jamais un fichier déjà présent.</p>
+  <p><b>qa test</b> refait la même préparation si besoin, puis exécute les contrôles.</p>
+
+  <h3>5.1. Créer le projet et l’initialiser</h3>
+  <pre>cd "C:\Users\GrâceAdjetey\Documents\Mes projets"
+mkdir mon-projet
+cd mon-projet
+npm init -y
+$env:NODE_OPTIONS='--use-system-ca'
+qa init
+qa test</pre>
+  <p>Si c’est une application web, crée-la avec ton outil habituel (Vite, etc.), puis lance <code>qa init</code> à la racine. Les fichiers déjà là (tsconfig, eslint…) restent intacts.</p>
+
+  <h3>5.2. qa.config.json</h3>
+  <p><code>qa init</code> crée ce fichier s’il n’existe pas. Tu peux ensuite l’éditer. Sans ce fichier, <code>qa test</code> s’arrête : <i>qa.config.json introuvable</i>.</p>
+  <ul>
+    <li><b>enabled: true</b> = le contrôle est lancé. <b>false</b> = il est ignoré.</li>
+    <li><b>required: true</b> = un échec fait échouer toute la gate (FAIL). <b>false</b> = avertissement (⚠), la gate peut rester PASS.</li>
+  </ul>
+  <p class="note"><b>À retenir :</b> sur un projet tout neuf, tu peux désactiver e2e / visual / lighthouse dans qa.config.json tant que tu n’as pas d’app qui tourne sur le port 5173.</p>
+
+  <h3>5.3. Scripts npm</h3>
+  <table>
+    <tr><th>Contrôle</th><th>Script npm attendu</th><th>Qui le crée ?</th></tr>
+    <tr><td>lint</td><td>lint</td><td>qa init (s’il manque)</td></tr>
+    <tr><td>typecheck</td><td>typecheck</td><td>qa init (s’il manque)</td></tr>
+    <tr><td>unit</td><td>test:unit</td><td>qa init (s’il manque)</td></tr>
+    <tr><td>integration</td><td>test:integration</td><td>Toi (scénario métier)</td></tr>
+    <tr><td>coverage</td><td>test:coverage</td><td>qa init (s’il manque)</td></tr>
+    <tr><td>e2e</td><td>test:e2e</td><td>qa init (s’il manque)</td></tr>
+    <tr><td>a11y</td><td>test:a11y</td><td>qa init (s’il manque)</td></tr>
+    <tr><td>visual</td><td>test:visual</td><td>qa init (s’il manque)</td></tr>
+    <tr><td>audit</td><td>security:audit</td><td>qa init (s’il manque)</td></tr>
+    <tr><td>secrets</td><td>security:secrets</td><td>qa init (s’il manque)</td></tr>
+    <tr><td>bundle</td><td>perf:bundle</td><td>qa init (s’il manque)</td></tr>
+    <tr><td>lighthouse</td><td>perf:lighthouse</td><td>qa init (s’il manque)</td></tr>
+  </table>
+
+  <h3>5.4. Ce que qa init / qa test créent tout seuls</h3>
+  <p>Uniquement si le contrôle est activé et que l’élément n’existe pas encore :</p>
+  <ul>
+    <li>lint : eslint + eslint.config.js</li>
+    <li>typecheck : typescript + tsconfig.json</li>
+    <li>unit / coverage : vitest + vitest.config.ts</li>
+    <li>e2e : Playwright, playwright.config.ts, e2e/accueil.spec.ts, Chromium</li>
+    <li>a11y : @axe-core/playwright + e2e/a11y/accueil.a11y.spec.ts</li>
+    <li>visual : e2e/visual/accueil.visual.spec.ts</li>
+    <li>audit : script security:audit</li>
+    <li>secrets : secretlint + .secretlintrc.json + .secretlintignore</li>
+    <li>bundle : size-limit + .size-limit.json</li>
+    <li>lighthouse : paquets + perf-lighthouse.mjs</li>
+  </ul>
+  <pre>$env:NODE_OPTIONS='--use-system-ca'
+qa init
+qa test</pre>
+
+  <h2>6. Les fichiers de tests</h2>
+  <p><code>qa init</code> pose des specs d’accueil génériques (la page se charge, a11y, snapshot). Les scénarios métier restent à toi.</p>
+  <ul>
+    <li>Unitaires : fichiers *.test.ts (souvent dans src/).</li>
+    <li>Intégration : fichiers dans tests/ — à créer toi-même.</li>
+    <li>E2E : e2e/*.spec.ts (Playwright). Spec d’accueil créée si absente.</li>
+    <li>Accessibilité : e2e/a11y/*.spec.ts — spec d’accueil créée si absente.</li>
+    <li>Visuel : e2e/visual/*.spec.ts. Spec d’accueil créée si absente. Au premier run local, Playwright crée le PNG de référence. Un vrai changement d’écran fera échouer le test jusqu’à <code>npm run test:visual -- --update-snapshots</code> si le changement est voulu.</li>
+  </ul>
+
+  <h2>7. Lire le résultat</h2>
+  <ul>
+    <li>✔ = réussi</li>
+    <li>✖ = échec d’un contrôle obligatoire → FAIL</li>
+    <li>⚠ = échec d’un contrôle non obligatoire → la gate peut rester PASS</li>
+  </ul>
+  <p>Fichiers produits :</p>
+  <pre>projet\.qa\report.html
+projet\.qa\report.json</pre>
+
+  <h2>8. Commandes utiles</h2>
+  <pre>qa --help
+qa init
+qa init --cwd "C:\chemin\vers\un-autre-projet"
+qa test
+qa test --cwd "C:\chemin\vers\un-autre-projet"
+qa test --fail-fast</pre>
+
+  <h2>9. Problèmes fréquents</h2>
+  <p><b>qa n’est pas reconnu</b> — refais npm run build puis npm link dans qa_framework. Ferme et rouvre PowerShell.</p>
+  <p><b>qa.config.json introuvable</b> — tu n’es pas dans le bon dossier, ou tu n’as pas encore lancé <code>qa init</code>.</p>
+  <p><b>package.json introuvable</b> — lance d’abord <code>npm init -y</code> (ou crée le projet avec Vite), puis <code>qa init</code>.</p>
+  <p><b>UNABLE_TO_VERIFY_LEAF_SIGNATURE</b> — exécute <code>$env:NODE_OPTIONS='--use-system-ca'</code> puis relance.</p>
+  <p><b>Missing script: lint</b> — lance <code>qa init</code>, ou désactive le check dans qa.config.json.</p>
+  <p><b>Le rapport ne s’ouvre pas</b> — Ctrl + clic sur le lien file://, ou ouvre projet\.qa\report.html.</p>
+  <p><b>Tests visuels en échec après un changement d’écran</b> — normal. Si c’est voulu : <code>npm run test:visual -- --update-snapshots</code></p>
+
+  <h2>10. Fiche mémo</h2>
+  <p>Première installation de l’outil :</p>
+  <pre>cd "...\qa_framework"
+$env:NODE_OPTIONS='--use-system-ca'
+npm install
+npm run build
+npm link</pre>
+  <p>Nouveau projet :</p>
+  <pre>cd "...\mon-projet"
+npm init -y
+$env:NODE_OPTIONS='--use-system-ca'
+qa init
+qa test</pre>
+  <p>Projet déjà préparé :</p>
+  <pre>cd "...\mon-projet"
+$env:NODE_OPTIONS='--use-system-ca'
+qa test</pre>
+  <p class="note"><b>À retenir :</b> tu travailles toujours dans le dossier du projet à tester. qa_framework, c’est l’outil. pilote-web (ou mon-projet), c’est l’application contrôlée. qa init n’écrase jamais tes fichiers existants.</p>
+</body>
+</html>

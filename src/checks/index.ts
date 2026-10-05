@@ -1,110 +1,75 @@
 import type { Check } from '../core/types';
 import { helloCheck } from './hello';
 import { scriptCheck } from './script';
-
-const PLAYWRIGHT_CONFIG = `import { defineConfig } from '@playwright/test';
-
-export default defineConfig({
-  testDir: './e2e',
-  outputDir: './test-results',
-  reporter: [['html', { outputFolder: 'playwright-report', open: 'never' }]],
-  use: {
-    baseURL: 'http://localhost:5173',
-    screenshot: 'only-on-failure',
-    trace: 'retain-on-failure',
-  },
-  webServer: {
-    command: 'npm run dev',
-    url: 'http://localhost:5173',
-    reuseExistingServer: true,
-    timeout: 30_000,
-  },
-  projects: [
-    { name: 'e2e', testIgnore: ['**/a11y/**', '**/visual/**'] },
-    { name: 'a11y', testMatch: ['**/a11y/**/*.spec.ts'] },
-    { name: 'visual', testMatch: ['**/visual/**/*.spec.ts'] },
-  ],
-});
-`;
-
-const SECRETLINT_CONFIG = `{
-  "rules": [{ "id": "@secretlint/secretlint-rule-preset-recommend" }]
-}
-`;
-
-const SECRETLINT_IGNORE = `node_modules/**
-dist/**
-coverage/**
-.qa/**
-playwright-report/**
-test-results/**
-package-lock.json
-**/*-snapshots/**
-`;
-
-const SIZE_LIMIT_CONFIG = `[
-  {
-    "name": "JS de l'application",
-    "path": "dist/assets/*.js",
-    "limit": "150 KB"
-  }
-]
-`;
-
-const LIGHTHOUSE_SCRIPT = `import { launch } from 'chrome-launcher';
-import lighthouse from 'lighthouse';
-
-const URL_A_TESTER = 'http://localhost:4173';
-const SEUIL = 0.8;
-
-const chrome = await launch({ chromeFlags: ['--headless'] });
-
-try {
-  const resultat = await lighthouse(URL_A_TESTER, {
-    port: chrome.port,
-    onlyCategories: ['performance'],
-    output: 'json',
-  });
-
-  const score = resultat.lhr.categories.performance.score;
-  const scoreSur100 = Math.round(score * 100);
-
-  console.log(\`Score de performance Lighthouse : \${scoreSur100}/100 (seuil : \${SEUIL * 100})\`);
-
-  if (score < SEUIL) {
-    console.error(\`Échec : le score (\${scoreSur100}) est sous le seuil (\${SEUIL * 100}).\`);
-    process.exitCode = 1;
-  }
-} finally {
-  await chrome.kill();
-}
-`;
+import {
+  A11Y_SPEC,
+  E2E_SPEC,
+  ESLINT_CONFIG,
+  LIGHTHOUSE_SCRIPT,
+  PLAYWRIGHT_CONFIG,
+  SECRETLINT_CONFIG,
+  SECRETLINT_IGNORE,
+  SIZE_LIMIT_CONFIG,
+  TSCONFIG,
+  VISUAL_SPEC,
+  VITEST_CONFIG,
+} from '../core/templates';
 
 export const registry: Record<string, Check> = {
   hello: helloCheck,
-  lint: scriptCheck('lint', 'lint'),
-  typecheck: scriptCheck('typecheck', 'typecheck'),
-  unit: scriptCheck('unit', 'test:unit'),
+
+  lint: scriptCheck('lint', 'lint', undefined, {
+    packages: ['eslint', '@eslint/js', 'typescript-eslint'],
+    scripts: [{ name: 'lint', command: 'eslint src' }],
+    files: [{ path: 'eslint.config.js', content: ESLINT_CONFIG }],
+  }),
+
+  typecheck: scriptCheck('typecheck', 'typecheck', undefined, {
+    packages: ['typescript', '@types/node'],
+    scripts: [{ name: 'typecheck', command: 'tsc --noEmit' }],
+    files: [{ path: 'tsconfig.json', content: TSCONFIG }],
+  }),
+
+  unit: scriptCheck('unit', 'test:unit', undefined, {
+    packages: ['vitest'],
+    scripts: [{ name: 'test:unit', command: 'vitest run --dir src' }],
+    files: [{ path: 'vitest.config.ts', content: VITEST_CONFIG }],
+  }),
+
   integration: scriptCheck('integration', 'test:integration'),
 
   coverage: scriptCheck('coverage', 'test:coverage', undefined, {
-    packages: ['@vitest/coverage-v8'],
+    packages: ['vitest', '@vitest/coverage-v8'],
+    scripts: [{ name: 'test:coverage', command: 'vitest run --coverage' }],
+    files: [{ path: 'vitest.config.ts', content: VITEST_CONFIG }],
   }),
 
   e2e: scriptCheck('e2e', 'test:e2e', 'test-results', {
     packages: ['@playwright/test'],
     scripts: [{ name: 'test:e2e', command: 'playwright test --project=e2e' }],
     postInstall: 'npx playwright install chromium',
-    files: [{ path: 'playwright.config.ts', content: PLAYWRIGHT_CONFIG }],
+    files: [
+      { path: 'playwright.config.ts', content: PLAYWRIGHT_CONFIG },
+      { path: 'e2e/accueil.spec.ts', content: E2E_SPEC },
+    ],
   }),
 
   a11y: scriptCheck('a11y', 'test:a11y', undefined, {
-    packages: ['@axe-core/playwright'],
+    packages: ['@playwright/test', '@axe-core/playwright'],
     scripts: [{ name: 'test:a11y', command: 'playwright test --project=a11y' }],
+    files: [
+      { path: 'playwright.config.ts', content: PLAYWRIGHT_CONFIG },
+      { path: 'e2e/a11y/accueil.a11y.spec.ts', content: A11Y_SPEC },
+    ],
   }),
 
   visual: scriptCheck('visual', 'test:visual', 'test-results', {
+    packages: ['@playwright/test'],
     scripts: [{ name: 'test:visual', command: 'playwright test --project=visual' }],
+    files: [
+      { path: 'playwright.config.ts', content: PLAYWRIGHT_CONFIG },
+      { path: 'e2e/visual/accueil.visual.spec.ts', content: VISUAL_SPEC },
+    ],
   }),
 
   audit: scriptCheck('audit', 'security:audit', undefined, {
