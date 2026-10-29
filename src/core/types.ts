@@ -17,11 +17,30 @@ export interface CheckContext {
   config: import('../config').Config;
 }
 
+export interface ContextePreparation {
+  cwd: string;
+  stack: import('./stack').ProfilApp;
+}
+
+export interface FichierRequis {
+  path: string;
+  content: string | ((ctx: ContextePreparation) => string);
+  ecrireSi?: (ctx: ContextePreparation) => boolean;
+}
+
+type SelonProfil<T> = T | ((ctx: ContextePreparation) => T);
+
+export interface ScriptRequis {
+  name: string;
+  command: string;
+}
+
 export interface CheckRequirement {
-  packages?: string[];
-  scripts?: { name: string; command: string }[];
-  files?: { path: string; content: string }[];
+  packages?: SelonProfil<string[]>;
+  scripts?: SelonProfil<ScriptRequis[]>;
+  files?: SelonProfil<FichierRequis[]>;
   postInstall?: string;
+  postInstallSi?: (cwd: string) => Promise<boolean>;
 }
 
 export interface Check {

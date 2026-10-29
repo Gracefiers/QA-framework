@@ -41,10 +41,8 @@ program
     const spinner = createSpinner();
 
     for (const check of checks) {
-      spinner.start(`préparation ${check.id}…`);
       await ensureReady(opts.cwd, check.id, check.requirement);
     }
-    spinner.stop();
 
     const isBlocking = (id: string) => config.checks[id]?.required ?? true;
     const failFast = opts.failFast ?? config.gate.failFast;
@@ -57,7 +55,7 @@ program
         spinner.stop();
         const status = r.status === 'fail' && !isBlocking(r.id) ? 'warn' as const : r.status;
         console.log(`${icons[status]} ${r.id.padEnd(12)} ${r.summary} (${r.durationMs} ms)`);
-        if (status === 'fail' && r.details) {
+        if ((status === 'fail' || status === 'warn') && r.details) {
           const lines = r.details.trim().split('\n').slice(-15).map((l) => '    ' + l);
           console.log(pc.dim(lines.join('\n')));
         }

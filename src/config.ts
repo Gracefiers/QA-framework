@@ -4,6 +4,7 @@ import { join } from 'node:path';
 
 export const ConfigSchema = z.object({
   projectType: z.enum(['web', 'api', 'mobile']).default('web'),
+  publicPath: z.string().default('/'),
   checks: z
     .record(
       z.string(),
@@ -18,7 +19,7 @@ export const ConfigSchema = z.object({
     .object({
       failFast: z.boolean().default(false),
     })
-    .default({}),
+    .default(() => ({ failFast: false })),
 });
 
 export type Config = z.infer<typeof ConfigSchema>;
